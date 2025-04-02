@@ -248,6 +248,59 @@ function getStatusBadgeClass($status) {
         body {
             font-family: 'JetBrains Mono', monospace;
         }
+        /* SQL Script Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .sql-container {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 15px 0;
+            overflow-x: auto;
+            white-space: pre;
+            font-size: 14px;
+        }
+        .copy-message {
+            background-color: #e6ffe6;
+            color: #006600;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -661,8 +714,33 @@ function getStatusBadgeClass($status) {
                                         Unban and Reject
                                     </button>
                                 <?php endif; ?>
+                                <button type="button" id="generate-sql-btn"
+                                        class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+                                    Generate sakaStats SQL Script
+                                </button>
+                                <div id="sql-modal" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close-modal">&times;</span>
+                                        <h2 class="text-xl font-bold mb-3">sakaStats SQL Insert Script</h2>
+                                        <div id="copy-message" class="copy-message">SQL script copied to clipboard!</div>
+                                        <p class="mb-3">Copy and paste this SQL script to add the player data to the sakaStats database:</p>
+                                        <div id="sql-script" class="sql-container"></div>
+                                        <div class="flex justify-end mt-4">
+                                            <button id="copy-sql-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+                                                Copy to Clipboard
+                                            </button>
+                                            <button id="close-modal-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         <?php endif; ?>
+
+
+
+
 
                         <!-- Back to List button - always visible -->
                         <div class="<?php echo $disableControls ? '' : 'mt-3'; ?>">
@@ -713,4 +791,154 @@ function getStatusBadgeClass($status) {
     </div>
 </div>
 </body>
+<script>
+    // SQL Script Generation
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('SQL Script Generator initialized');
+
+        // Get modal elements
+        const modal = document.getElementById('sql-modal');
+        const sqlScript = document.getElementById('sql-script');
+        const closeSpan = document.getElementsByClassName('close-modal')[0];
+        const copyBtn = document.getElementById('copy-sql-btn');
+        const closeBtn = document.getElementById('close-modal-btn');
+        const copyMessage = document.getElementById('copy-message');
+        const generateBtn = document.getElementById('generate-sql-btn');
+
+        if (!generateBtn) {
+            console.error('Generate SQL button not found');
+            return;
+        }
+
+        console.log('Generate SQL button found');
+
+        // Application data from PHP - ensure proper escaping for JavaScript strings
+        const appData = {
+            id: <?php echo $application['id']; ?>,
+            steamId: <?php echo json_encode($application['steam_id3'] ?? '[U:1:0]'); ?>,
+            username: <?php echo json_encode($application['steam_username'] ?? 'Unknown'); ?>,
+            discordUsername: <?php echo json_encode($application['discord_username'] ?? ''); ?>,
+            email: <?php echo json_encode($application['email'] ?? ''); ?>
+        };
+
+        console.log('Application data loaded:', appData);
+
+        // Generate SQL script
+        function generateSQLScript() {
+            // Build comment with user details
+            let commentParts = [];
+            if (appData.discordUsername) {
+                commentParts.push(`Discord: ${appData.discordUsername}`);
+            }
+            if (appData.email) {
+                commentParts.push(`Email: ${appData.email}`);
+            }
+            commentParts.push(`Application-ID: ${appData.id}`);
+
+            const comment = commentParts.join('\\r\\n');
+
+            // Create SQL script with proper escaping for SQL strings
+            return `INSERT INTO \`sakaStats\` (\`steamid\`, \`name\`, \`kills\`, \`deaths\`, \`playtime\`, \`points\`, \`topspeed\`, \`deflections\`, \`manual-insert\`, \`comment\`) VALUES ('${appData.steamId}', '${appData.username.replace(/'/g, "''")}', '0', '0', '0', '1000', '0', '0', '1', '${comment.replace(/'/g, "''")}');`;
+        }
+
+        // Copy to clipboard function with fallback for older browsers
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                // Navigator clipboard API method
+                navigator.clipboard.writeText(text).then(function() {
+                    showCopySuccess();
+                }, function(err) {
+                    console.error('Could not copy text: ', err);
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            // Create text area
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Make the textarea out of viewport
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    console.error('Failed to copy text with execCommand');
+                    alert('Failed to copy. Please select the text and copy manually (Ctrl+C).');
+                }
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy. Please select the text and copy manually (Ctrl+C).');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            copyMessage.style.display = 'block';
+            setTimeout(function() {
+                copyMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Show modal when generate button is clicked
+        generateBtn.addEventListener('click', function(e) {
+            console.log('Generate SQL button clicked');
+            e.preventDefault(); // Prevent form submission if button is inside a form
+            const sql = generateSQLScript();
+            console.log('Generated SQL:', sql);
+            sqlScript.textContent = sql;
+            modal.style.display = 'block';
+        });
+
+        // Copy SQL script to clipboard
+        copyBtn.addEventListener('click', function() {
+            console.log('Copy button clicked');
+            copyToClipboard(sqlScript.textContent);
+        });
+
+        // Close modal when clicking the X
+        closeSpan.addEventListener('click', function() {
+            console.log('Close X clicked');
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking the Close button
+        closeBtn.addEventListener('click', function() {
+            console.log('Close button clicked');
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                console.log('Clicked outside modal');
+                modal.style.display = 'none';
+            }
+        });
+
+        // Prevent form submission when pressing the Generate SQL button
+        if (generateBtn.form) {
+            generateBtn.form.addEventListener('submit', function(e) {
+                if (e.submitter === generateBtn) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        console.log('SQL Script Generator setup completed');
+    });
+</script>
 </html>

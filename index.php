@@ -220,6 +220,204 @@
     <h1 class="text-5xl font-bold">Join the saka Dodgeball Whitelist</h1>
 </div>
 
+<?php
+// Display rejection history warning if user has previous rejections
+$rejection_history = null;
+$rejectedCount = 0;
+$steamid = null;
+$email = null;
+$discordid = null;
+
+// Collect identifiers from current login methods
+if (isset($_SESSION['steam_verified']) && $_SESSION['steam_verified'] === true) {
+    $steamid = $_SESSION['steam_id'];
+}
+if (isset($_SESSION['discord_verified']) && $_SESSION['discord_verified'] === true) {
+    $discordid = $_SESSION['discord_id'];
+}
+if (isset($_SESSION['email_verified']) && $_SESSION['email_verified'] === true) {
+    $email = $_SESSION['verified_email'];
+}
+
+// Check for previous rejections based on authentication methods
+try {
+    $pdo = getDatabaseConnection();
+    if ($pdo) {
+        // First, check if the currently logged in user has any applications
+        $currentRejections = 0;
+        $currentIdentifier = '';
+        $identifierType = '';
+
+        // Check rejection count by Steam ID (if available)
+        if ($steamid) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE steam_id = :steam_id 
+                AND status = 'rejected'
+            ");
+            $stmt->execute([':steam_id' => $steamid]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $steamRejections = $result['rejected_count'] ?? 0;
+
+            if ($steamRejections > $currentRejections) {
+                $currentRejections = $steamRejections;
+                $currentIdentifier = $_SESSION['steam_username'];
+                $identifierType = 'Steam account';
+            }
+        }
+
+        // Check rejection count by Discord ID (if available)
+        if ($discordid) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE discord_id = :discord_id 
+                AND status = 'rejected'
+            ");
+            $stmt->execute([':discord_id' => $discordid]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $discordRejections = $result['rejected_count'] ?? 0;
+
+            if ($discordRejections > $currentRejections) {
+                $currentRejections = $discordRejections;
+                $currentIdentifier = $_SESSION['discord_username'];
+                $identifierType = 'Discord account';
+            }
+        }
+
+        // Check rejection count by Email (if available)
+        if ($email) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE email = :email 
+                AND status = 'rejected'
+            ");
+            $stmt->execute([':email' => $email]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $emailRejections = $result['rejected_count'] ?? 0;
+
+            if ($emailRejections > $currentRejections) {
+                $currentRejections = $emailRejections;
+                $currentIdentifier = $email;
+                $identifierType = 'email address';
+            }
+        }
+
+        // Now check if there are linked accounts with higher rejection counts
+
+        // If we have email but no steamid, try to find linked steamid from previous applications
+        if ($email && (!$steamid || $currentRejections == 0)) {
+            $stmt = $pdo->prepare("
+                SELECT steam_id, steam_username, COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE email = :email 
+                AND steam_id IS NOT NULL
+                AND status = 'rejected'
+                GROUP BY steam_id, steam_username
+                ORDER BY rejected_count DESC
+                LIMIT 1
+            ");
+            $stmt->execute([':email' => $email]);
+            $linkedSteam = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($linkedSteam && $linkedSteam['rejected_count'] > $currentRejections) {
+                $currentRejections = $linkedSteam['rejected_count'];
+                $currentIdentifier = $linkedSteam['steam_username'];
+                $identifierType = 'Steam account';
+            }
+        }
+
+        // If we have discord but no steamid, try to find linked steamid from previous applications
+        if ($discordid && (!$steamid || $currentRejections == 0)) {
+            $stmt = $pdo->prepare("
+                SELECT steam_id, steam_username, COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE discord_id = :discord_id 
+                AND steam_id IS NOT NULL
+                AND status = 'rejected'
+                GROUP BY steam_id, steam_username
+                ORDER BY rejected_count DESC
+                LIMIT 1
+            ");
+            $stmt->execute([':discord_id' => $discordid]);
+            $linkedSteam = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($linkedSteam && $linkedSteam['rejected_count'] > $currentRejections) {
+                $currentRejections = $linkedSteam['rejected_count'];
+                $currentIdentifier = $linkedSteam['steam_username'];
+                $identifierType = 'Steam account';
+            }
+        }
+
+        // If we have steamid but want to check for higher rejection counts on linked emails
+        if ($steamid) {
+            $stmt = $pdo->prepare("
+                SELECT email, COUNT(*) as rejected_count 
+                FROM whitelist_applications 
+                WHERE steam_id = :steam_id 
+                AND email IS NOT NULL
+                AND email != ''
+                AND status = 'rejected'
+                GROUP BY email
+                ORDER BY rejected_count DESC
+                LIMIT 1
+            ");
+            $stmt->execute([':steam_id' => $steamid]);
+            $linkedEmail = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($linkedEmail && $linkedEmail['rejected_count'] > $currentRejections) {
+                $currentRejections = $linkedEmail['rejected_count'];
+                $currentIdentifier = $linkedEmail['email'];
+                $identifierType = 'email address';
+            }
+        }
+
+        // Set rejection history if we found any rejections
+        if ($currentRejections > 0) {
+            $rejection_history = [
+                'count' => $currentRejections,
+                'type' => $identifierType,
+                'identifier' => $currentIdentifier
+            ];
+            $rejectedCount = $currentRejections;
+        }
+    }
+} catch (PDOException $e) {
+    logMessage('application_error.log', "Error checking rejection history: " . $e->getMessage());
+}
+
+// Display rejection warning if there are previous rejections
+if ($rejection_history && $rejection_history['count'] > 0):
+    ?>
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 max-w-5xl mx-auto">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm">
+                    <strong>Application History:</strong> Your <?php echo htmlspecialchars($rejection_history['type']); ?>
+                    (<?php echo htmlspecialchars($rejection_history['identifier']); ?>) has been previously rejected
+                    <?php echo $rejection_history['count']; ?> time<?php echo $rejection_history['count'] > 1 ? 's' : ''; ?>.
+                </p>
+                <p class="text-sm mt-2">
+                    Please ensure you provide complete and accurate information in this application. Review any previous
+                    admin feedback before submitting.
+                </p>
+                <p class="text-sm mt-2">
+                    <a href="status.php" class="font-medium underline text-yellow-700 hover:text-yellow-600">
+                        View your application history
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <!-- BANNED APPLICATION NOTICE -->
 <?php if ($isBanned): ?>
     <!-- Display banned application notice instead of the form -->
@@ -555,7 +753,7 @@
                                     Verify Code
                                 </button>
                             </div>
-                            <p class="text-sm text-yellow-600 mb-4">We sent a verification code to your email. Please check your inbox and spam folder.</p>
+                            <p id="email_verification_description" class="text-sm text-yellow-600 mb-4">We sent a verification code to your email. Please check your inbox and spam folder.</p>
                         </div>
                     <?php else: ?>
                         <!-- Initial email input state -->
@@ -610,7 +808,7 @@
                         </div>
                         <?php if (!empty($_SESSION['steam_avatar'])): ?>
                             <div class="ml-auto mr-4">
-                                <img src="<?php echo htmlspecialchars($_SESSION['steam_avatar']); ?>" alt="Steam Avatar" class="w-10 h-10 rounded-full">
+                                <img src="<?php echo htmlspecialchars($_SESSION['steam_avatar']); ?>" alt="Steam Avatar" class="w-20 h-20 rounded-full">
                             </div>
                         <?php endif; ?>
                         <a href="logout.php?service=steam" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm flex items-center">
@@ -841,6 +1039,8 @@
         </div>
     </form>
 
+
+
     <!-- Debug Panel - Only visible in debug mode -->
     <?php
     // Define a simple function to check if we're in debug mode
@@ -983,6 +1183,9 @@
     <?php endif; // End of debug mode check ?>
 </div>
 <?php endif; ?>
+<div class="text-center text-gray-400 mt-8 mb-4">
+    <p class="text-sm">&copy; saka Dodgeball <?php echo date('Y'); ?>. All rights reserved.</p>
+</div>
 <script>
     // Simple form persistence script
 
@@ -1443,6 +1646,46 @@
             return false;
         }
     });
+
+    // Check if we need to clear the form data (after logout)
+    if (window.location.search.includes('clear_form=1')) {
+        localStorage.removeItem('formData');
+
+        const emailVerificationDiv = document.getElementById('email_verification');
+        if (emailVerificationDiv) {
+            const emailInput = document.getElementById('email');
+            const codeInput = document.getElementById('email_verification_code');
+            const sendCodeBtn = document.getElementById('send_code_btn');
+            const verifyCodeBtn = document.getElementById('verify_code_btn');
+            const verifyDescription = document.getElementById('email_verification_description');
+
+            if (emailInput) emailInput.value = '';
+
+            // Reset verification code input
+            if (codeInput) {
+                codeInput.value = '';
+                codeInput.classList.add('hidden');
+                codeInput.placeholder = '------';
+            }
+
+            if (verifyDescription) {
+                verifyDescription.classList.add('hidden');
+            }
+
+            // Reset send code button
+            if (sendCodeBtn) {
+                sendCodeBtn.textContent = 'Send Verification Code';
+            }
+
+            // Hide verify button
+            if (verifyCodeBtn) {
+                verifyCodeBtn.classList.add('hidden');
+            }
+        }
+        // Remove the query parameter without refreshing
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({path: newUrl}, '', newUrl);
+    }
 </script>
 </body>
 </html>
