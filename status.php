@@ -399,5 +399,8 @@ $timelineTypeClasses = [
         <?php endif; ?>
     </div>
 </div>
+<div class="text-center text-gray-400 mt-8 mb-4">
+    <p class="text-sm">&copy; saka Dodgeball <?php echo date('Y'); ?>. All rights reserved.</p>
+</div>
 </body>
 </html>
