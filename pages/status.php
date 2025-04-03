@@ -28,9 +28,9 @@ if (isset($_SESSION['steam_verified']) && $_SESSION['steam_verified'] === true) 
 
 // If not authenticated, redirect to authentication page
 if (!$authenticated) {
-    $_SESSION['redirect_after_auth'] = 'status.php';
+    $_SESSION['redirect_after_auth'] = '/status';
     $_SESSION['error_message'] = 'Please log in with Discord or Steam to view your application status.';
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -259,7 +259,7 @@ $timelineTypeClasses = [
         <?php endif; ?>
         <p class="text-gray-600">
             You are logged in with your <?php echo ucfirst($authMethod); ?> account.
-            <a href="logout.php?service=<?php echo $authMethod; ?>" class="text-blue-600 hover:underline ml-2">Logout</a>
+            <a href="/logout?service=<?php echo $authMethod; ?>" class="text-blue-600 hover:underline ml-2">Logout</a>
         </p>
     </div>
 
@@ -334,7 +334,7 @@ $timelineTypeClasses = [
 
                     <?php if ($applicationStatus === 'not_found'): ?>
                         <div class="mt-4">
-                            <a href="index.php" class="inline-block bg-black hover:bg-gray-800 text-white py-2 px-4 rounded">
+                            <a href="/" class="inline-block bg-black hover:bg-gray-800 text-white py-2 px-4 rounded">
                                 Apply Now
                             </a>
                         </div>
@@ -388,12 +388,12 @@ $timelineTypeClasses = [
 
     <!-- Actions -->
     <div class="mt-8 text-center">
-        <a href="index.php" class="inline-block bg-black hover:bg-gray-800 text-white py-2 px-6 rounded mr-4">
+        <a href="/" class="inline-block bg-black hover:bg-gray-800 text-white py-2 px-6 rounded mr-4">
             Return to Homepage
         </a>
 
         <?php if ($applicationStatus === 'rejected'): ?>
-            <a href="index.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded">
+            <a href="/" class="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded">
                 Submit New Application
             </a>
         <?php endif; ?>

@@ -23,7 +23,7 @@ $parsed_url = parse_url($return_url);
 if (!$parsed_url || !isset($parsed_url['scheme']) || !isset($parsed_url['host'])) {
     $_SESSION['error_message'] = 'Invalid return URL configuration.';
     logMessage('steam_auth.log', "Invalid return URL: " . $return_url);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 

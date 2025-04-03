@@ -73,6 +73,6 @@ switch ($service) {
 }
 
 // Redirect back to index page
-header('Location: index.php?clear_form=1');
+header('Location: /?clear_form=1');
 exit;
 ?>

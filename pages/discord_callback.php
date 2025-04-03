@@ -14,7 +14,7 @@ $redirect_uri = DISCORD_REDIRECT_URI;
 if (!isset($_GET['state']) || $_GET['state'] !== $_SESSION['discord_oauth_state']) {
     $_SESSION['error_message'] = 'Invalid state parameter. Authentication failed.';
     logMessage('discord_auth.log', "Discord authentication failed: Invalid state parameter");
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -54,7 +54,7 @@ if (curl_errno($ch)) {
     $_SESSION['error_message'] = 'Error requesting access token: ' . curl_error($ch);
     logMessage('discord_auth.log', "Token request error: " . curl_error($ch));
     curl_close($ch);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -66,7 +66,7 @@ $token_data = json_decode($token_response, true);
 if (!isset($token_data['access_token'])) {
     $_SESSION['error_message'] = 'Failed to retrieve access token.';
     logMessage('discord_auth.log', "Failed to retrieve access token: " . json_encode($token_data));
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -90,7 +90,7 @@ if (curl_errno($ch)) {
     $_SESSION['error_message'] = 'Error fetching user data: ' . curl_error($ch);
     logMessage('discord_auth.log', "API request error: " . curl_error($ch));
     curl_close($ch);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -102,7 +102,7 @@ $user_data = json_decode($api_response, true);
 if (!isset($user_data['id'])) {
     $_SESSION['error_message'] = 'Failed to retrieve user information.';
     logMessage('discord_auth.log', "Failed to retrieve user information: " . json_encode($user_data));
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -122,6 +122,6 @@ if ($applicationData) {
 }
 
 // Redirect back to the whitelist form
-header('Location: index.php');
+header('Location: /');
 exit;
 ?>

@@ -44,10 +44,10 @@
 
     </div>
 
-    <a href="index.php" class="inline-block mt-8 bg-black text-white py-2 px-6 rounded hover:bg-gray-800">
+    <a href="/" class="inline-block mt-8 bg-black text-white py-2 px-6 rounded hover:bg-gray-800">
         Return to Homepage
     </a>
-    <a href="status.php" class="inline-block bg-black text-white py-2 px-6 rounded hover:bg-gray-800">
+    <a href="/status" class="inline-block bg-black text-white py-2 px-6 rounded hover:bg-gray-800">
         Check Application Status
     </a>
 </div>

@@ -21,21 +21,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         logMessage('admin_security.log', "Unauthorized access attempt from IP: {$_SERVER['REMOTE_ADDR']}");
     }
 
-    // Determine the login page location
-    $login_page = 'login.php';
-
-    // If we're in a subdirectory, adjust path to login
-    if (!file_exists($login_page)) {
-        $login_page = 'admin/login.php';
-
-        // If we're already in the admin directory
-        if (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
-            $login_page = 'login.php';
-        }
-    }
-
-    // Redirect to login page
-    header("Location: $login_page");
+    // Redirect to login page - now we can use the absolute path
+    header("Location: /admin/login");
     exit;
 }
 
@@ -59,7 +46,7 @@ if (isset($_SESSION['admin_role'])) {
 
         // Redirect to dashboard with error
         $_SESSION['admin_error'] = 'You do not have permission to access that page';
-        header('Location: dashboard.php');
+        header('Location: /dashboard');
         exit;
     }
 }

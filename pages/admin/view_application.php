@@ -310,7 +310,7 @@ function getStatusBadgeClass($status) {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
         <div class="flex items-center space-x-4">
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="logout.php" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -322,14 +322,14 @@ function getStatusBadgeClass($status) {
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="dashboard.php" class="text-gray-700 hover:text-blue-600">
+                    <a href="/dashboard" class="text-gray-700 hover:text-blue-600">
                         Dashboard
                     </a>
                 </li>
                 <li>
                     <div class="flex items-center">
                         <span class="mx-2 text-gray-400">/</span>
-                        <a href="applications.php" class="text-gray-700 hover:text-blue-600">
+                        <a href="/applications" class="text-gray-700 hover:text-blue-600">
                             Applications
                         </a>
                     </div>
@@ -570,7 +570,7 @@ function getStatusBadgeClass($status) {
                                             <div class="flex flex-wrap justify-between items-center mb-1">
                                                 <div class="flex items-center">
                                                     <h4 class="font-medium">
-                                                        <a href="view_application.php?id=<?php echo $submission['id']; ?>"
+                                                        <a href="/view_application?id=<?php echo $submission['id']; ?>"
                                                            class="text-blue-600 hover:underline">
                                                             Application #<?php echo $submission['id']; ?>
                                                         </a>
@@ -744,7 +744,7 @@ function getStatusBadgeClass($status) {
 
                         <!-- Back to List button - always visible -->
                         <div class="<?php echo $disableControls ? '' : 'mt-3'; ?>">
-                            <a href="applications.php" class="block text-center w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                            <a href="/applications" class="block text-center w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
                                 Back to List
                             </a>
                         </div>
@@ -757,7 +757,7 @@ function getStatusBadgeClass($status) {
                 <div class="bg-gray-50 px-6 py-4 border-b">
                     <h2 class="text-lg font-bold">Activity Log</h2>
                     <?php if (!empty($activityLogs)): ?>
-                        <a href="clear_logs.php?id=<?php echo $application_id; ?>"
+                        <a href="/clear_logs?id=<?php echo $application_id; ?>"
                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
                             Clear Log
                         </a>

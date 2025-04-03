@@ -22,7 +22,7 @@ if (!isset($_GET['openid_claimed_id']) || !isset($_GET['openid_assoc_handle']) |
     !isset($_GET['openid_signed']) || !isset($_GET['openid_sig'])) {
     $_SESSION['error_message'] = 'Missing required OpenID parameters';
     logMessage('steam_auth.log', "Authentication failed - missing parameters: " . json_encode($_GET));
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -89,7 +89,7 @@ if (curl_errno($curl)) {
     $_SESSION['error_message'] = 'Error validating authentication: ' . $error;
     logMessage('steam_auth.log', "Validation error: " . $error);
     curl_close($curl);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -99,7 +99,7 @@ curl_close($curl);
 if (strpos($response, 'is_valid:true') === false) {
     $_SESSION['error_message'] = 'Steam authentication failed validation.';
     logMessage('steam_auth.log', "Authentication failed validation: " . $response);
-    header('Location: index.php');
+    header('Location: /p');
     exit;
 }
 
@@ -107,7 +107,7 @@ if (strpos($response, 'is_valid:true') === false) {
 if (!preg_match('/^https?:\/\/steamcommunity\.com\/openid\/id\/(7[0-9]{15,25})$/i', $_GET['openid_claimed_id'], $matches)) {
     $_SESSION['error_message'] = 'Failed to extract Steam ID from authentication response.';
     logMessage('steam_auth.log', "Failed to extract Steam ID from response: " . $_GET['openid_claimed_id']);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -141,7 +141,7 @@ if (curl_errno($curl)) {
     $_SESSION['error_message'] = 'Error fetching Steam user data: ' . $error;
     logMessage('steam_auth.log', "API request error: " . $error);
     curl_close($curl);
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -153,7 +153,7 @@ $user_data = json_decode($api_response, true);
 if (!isset($user_data['response']['players'][0])) {
     $_SESSION['error_message'] = 'Failed to retrieve Steam user information.';
     logMessage('steam_auth.log', "Failed to retrieve Steam user information: " . json_encode($user_data));
-    header('Location: index.php');
+    header('Location: /');
     exit;
 }
 
@@ -181,6 +181,6 @@ if ($applicationData) {
     $_SESSION['pending_application_data'] = $applicationData;
 }
 // Redirect back to the whitelist form
-header('Location: index.php');
+header('Location: /');
 exit;
 ?>

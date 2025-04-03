@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['form_errors'] = $errors;
         $_SESSION['form_data'] = $formData;
         logMessage('form_errors.log', "Form submission errors: " . implode(', ', $errors));
-        header("Location: index.php");
+        header("Location: /");
         exit;
     }
 
@@ -207,11 +207,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     unset($_SESSION['verified_email']);
 
     // Redirect to thank you page
-    header("Location: thank_you.php");
+    header("Location: /thank_you");
     exit;
 } else {
     // If not POST request, redirect to the form
-    header("Location: index.php");
+    header("Location: /");
     exit;
 }
 ?>

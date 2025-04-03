@@ -86,12 +86,12 @@ function formatDate($dateString) {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
 
         <div class="flex items-center space-x-4">
-            <a href="email_test.php" class="...">
+            <a href="/email_test" class="...">
                 Email Settings
             </a>
             <span class="divider h-4 bg-white w-[2px]"></span>
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="logout.php" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -140,22 +140,22 @@ function formatDate($dateString) {
 
     <!-- Quick links -->
     <div class="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <a href="applications.php?status=pending" class="bg-yellow-100 border border-yellow-200 p-4 rounded-lg hover:bg-yellow-200 flex flex-col items-center justify-center">
+        <a href="/applications?status=pending" class="bg-yellow-100 border border-yellow-200 p-4 rounded-lg hover:bg-yellow-200 flex flex-col items-center justify-center">
             <div class="text-3xl font-bold text-yellow-800 mb-2"><?php echo $stats['pending']; ?></div>
             <div class="text-yellow-800">Pending Applications</div>
         </a>
 
-        <a href="applications.php?status=approved" class="bg-green-100 border border-green-200 p-4 rounded-lg hover:bg-green-200 flex flex-col items-center justify-center">
+        <a href="/applications?status=approved" class="bg-green-100 border border-green-200 p-4 rounded-lg hover:bg-green-200 flex flex-col items-center justify-center">
             <div class="text-3xl font-bold text-green-800 mb-2"><?php echo $stats['approved']; ?></div>
             <div class="text-green-800">Approved Applications</div>
         </a>
 
-        <a href="applications.php?status=rejected" class="bg-red-100 border border-red-200 p-4 rounded-lg hover:bg-red-200 flex flex-col items-center justify-center">
+        <a href="/applications?status=rejected" class="bg-red-100 border border-red-200 p-4 rounded-lg hover:bg-red-200 flex flex-col items-center justify-center">
             <div class="text-3xl font-bold text-red-800 mb-2"><?php echo $stats['rejected']; ?></div>
             <div class="text-red-800">Rejected Applications</div>
         </a>
 
-        <a href="applications.php?status=banned" class="bg-gray-900 p-4 rounded-lg hover:bg-black flex flex-col items-center justify-center">
+        <a href="/applications?status=banned" class="bg-gray-900 p-4 rounded-lg hover:bg-black flex flex-col items-center justify-center">
             <div class="text-3xl font-bold text-white mb-2"><?php echo $stats['banned']; ?></div>
             <div class="text-white">Banned Users</div>
         </a>
@@ -198,7 +198,7 @@ function formatDate($dateString) {
                     </table>
 
                     <div class="mt-4">
-                        <a href="applications.php" class="block text-center bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
+                        <a href="/applications" class="block text-center bg-black text-white py-2 px-4 rounded hover:bg-gray-800">
                             View All Applications
                         </a>
                     </div>
@@ -224,7 +224,7 @@ function formatDate($dateString) {
                                             <span class="font-medium capitalize"><?php echo str_replace('_', ' ', $activity['action']); ?></span>
 
                                             <?php if (!empty($activity['application_id'])): ?>
-                                                <a href="view_application.php?id=<?php echo $activity['application_id']; ?>" class="text-blue-600 hover:underline ml-1">
+                                                <a href="/view_application?id=<?php echo $activity['application_id']; ?>" class="text-blue-600 hover:underline ml-1">
                                                     App #<?php echo $activity['application_id']; ?>
                                                 </a>
                                                 <?php if (!empty($activity['steam_username'])): ?>
