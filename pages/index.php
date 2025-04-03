@@ -1130,7 +1130,7 @@ if ($rejection_history && $rejection_history['count'] > 0):
                     <h5 class="font-bold text-gray-400">Debug Actions:</h5>
                     <div class="flex space-x-2 mt-1">
                         <a href="?debug_action=clear_session" class="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Clear Session</a>
-                        <a href="?debug_action=view_logs" class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">View Logs</a>
+                        <a href="?debug_action=view-logs" class="bg-blue-700 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">View Logs</a>
                         <a href="?debug_action=test_steam" class="bg-green-700 hover:bg-green-600 text-white px-2 py-1 rounded text-xs">Test Steam Auth</a>
                     </div>
                 </div>
@@ -1146,7 +1146,7 @@ if ($rejection_history && $rejection_history['count'] > 0):
                     echo '<script>alert("Session cleared"); window.location.href = "index.php";</script>';
                     break;
 
-                case 'view_logs':
+                case 'view-logs':
                     // This would be better in a separate page, but for simple debugging:
                     echo '<div class="fixed inset-0 bg-black bg-opacity-90 z-50 p-4 overflow-auto">';
                     echo '<div class="bg-gray-800 text-white p-4 rounded max-w-4xl mx-auto">';
@@ -1391,7 +1391,7 @@ if ($rejection_history && $rejection_history['count'] > 0):
         sendButton.disabled = true;
 
         // AJAX to send verification code
-        fetch('send_verification.php', {
+        fetch('send_verification', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

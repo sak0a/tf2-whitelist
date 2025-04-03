@@ -5,21 +5,12 @@ require_once 'config.php';
 
 // Create the router dispatcher
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    // Main site routes with automatic file resolution
+    // Define static routes first, then dynamic routes to avoid shadowing
+
+    // Static route for homepage
     $r->addRoute('GET', '/', function() { require 'pages/index.php'; });
-    $r->addRoute(['GET', 'POST'], '/{page}', function($vars) {
-        $page = $vars['page'];
-        $file = 'pages/' . $page . '.php';
 
-        if (file_exists($file) && is_readable($file)) {
-            require $file;
-        } else {
-            header("HTTP/1.0 404 Not Found");
-            echo "404 Page Not Found";
-        }
-    });
-
-    // Admin routes
+    // Admin routes - static routes should go before the variable ones
     $r->addRoute('GET', '/admin', function() {
         session_start();
         if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
@@ -31,19 +22,19 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     });
 
     // Handle specific admin routes with parameters
-    $r->addRoute(['GET', 'POST'], '/admin/view_application/{id:\d+}', function($vars) {
+    $r->addRoute(['GET', 'POST'], '/admin/view-application/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/view_application.php';
+        require 'pages/admin/view-application.php';
     });
 
-    $r->addRoute('GET', '/admin/quick_approve/{id:\d+}', function($vars) {
+    $r->addRoute('GET', '/admin/quick-approve/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick_approve.php';
+        require 'pages/admin/quick-approve.php';
     });
 
-    $r->addRoute('GET', '/admin/quick_reject/{id:\d+}', function($vars) {
+    $r->addRoute('GET', '/admin/quick-reject/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick_reject.php';
+        require 'pages/admin/quick-reject.php';
     });
 
     // General admin pages
@@ -64,6 +55,19 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
             // Redirect to dashboard if page doesn't exist
             header('Location: /admin/dashboard');
             exit;
+        }
+    });
+
+    // General page route - MUST come after more specific routes to avoid shadowing
+    $r->addRoute(['GET', 'POST'], '/{page}', function($vars) {
+        $page = $vars['page'];
+        $file = 'pages/' . $page . '.php';
+
+        if (file_exists($file) && is_readable($file)) {
+            require $file;
+        } else {
+            header("HTTP/1.0 404 Not Found");
+            echo "404 Page Not Found";
         }
     });
 });

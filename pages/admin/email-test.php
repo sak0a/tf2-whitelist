@@ -3,11 +3,11 @@
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Include PHPMailer setup
-require_once 'phpmailer_setup.php';
+require_once 'phpmailer-setup.php';
 
 // Check if PHPMailer is installed
 $phpmailer_installed = checkPHPMailer();
@@ -309,7 +309,7 @@ function getVerificationEmailTemplate() {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
         <div class="flex items-center space-x-4">
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/admin/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -321,7 +321,7 @@ function getVerificationEmailTemplate() {
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="/dashboard" class="text-gray-700 hover:text-blue-600">
+                    <a href="/admin/dashboard" class="text-gray-700 hover:text-blue-600">
                         Dashboard
                     </a>
                 </li>
@@ -548,8 +548,8 @@ function getVerificationEmailTemplate() {
             <div class="mt-8">
                 <h3 class="font-bold mb-2">Email Logs</h3>
                 <div class="flex space-x-4 mt-2">
-                    <a href="/view_logs?file=email.log" class="text-blue-600 hover:underline">View Success Log</a>
-                    <a href="/view_logs?file=email_error.log" class="text-red-600 hover:underline">View Error Log</a>
+                    <a href="/admin/view-logs?file=email.log" class="text-blue-600 hover:underline">View Success Log</a>
+                    <a href="/admin/view-logs?file=email_error.log" class="text-red-600 hover:underline">View Error Log</a>
                 </div>
             </div>
 

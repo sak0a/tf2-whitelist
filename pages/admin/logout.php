@@ -3,7 +3,7 @@
 session_start();
 
 // Include configuration
-require_once '../config.php';
+require_once 'config.php';
 
 // Log the logout
 if (isset($_SESSION['admin_username'])) {
@@ -22,6 +22,6 @@ session_start();
 $_SESSION['admin_success'] = 'You have been successfully logged out.';
 
 // Redirect to login page
-header('Location: login.php');
+header('Location: /admin/login');
 exit;
 ?>

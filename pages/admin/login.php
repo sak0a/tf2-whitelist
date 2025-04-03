@@ -3,11 +3,11 @@
 session_start();
 
 // Include configuration
-require_once '../config.php';
+require_once 'config.php';
 
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header('Location: dashboard.php');
+    header('Location: /admin/dashboard');
     exit;
 }
 
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     logMessage('admin_auth.log', "Admin login successful: {$admin['username']} (ID: {$admin['id']}, Role: {$admin['role']}) from IP: {$_SERVER['REMOTE_ADDR']}");
 
                     // Redirect to dashboard
-                    header('Location: dashboard.php');
+                    header('Location: /admin/dashboard');
                     exit;
                 } else {
                     // Legacy password verification (if not using bcrypt)
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         logMessage('admin_auth.log', "Admin login successful: {$admin['username']} (ID: {$admin['id']}, Role: {$admin['role']}) from IP: {$_SERVER['REMOTE_ADDR']}");
 
                         // Redirect to dashboard
-                        header('Location: dashboard.php');
+                        header('Location: /admin/dashboard');
                         exit;
                     } else {
                         $error = 'Invalid username or password';
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="login.php">
+            <form method="POST" action="/admin/login">
                 <div class="mb-4">
                     <label for="username" class="block text-gray-700 font-bold mb-2">Username</label>
                     <input

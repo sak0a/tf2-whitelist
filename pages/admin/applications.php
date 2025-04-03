@@ -3,7 +3,7 @@
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Define filters and pagination
@@ -92,7 +92,7 @@ function formatDate($dateString) {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
         <div class="flex items-center space-x-4">
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/admin/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -104,7 +104,7 @@ function formatDate($dateString) {
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="/dashboard" class="text-gray-700 hover:text-blue-600">
+                    <a href="/admin/dashboard" class="text-gray-700 hover:text-blue-600">
                         Dashboard
                     </a>
                 </li>
@@ -245,15 +245,15 @@ function formatDate($dateString) {
                                         </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="/view_application?id=<?php echo $app['id']; ?>" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <a href="/admin/view-application/<?php echo $app['id']; ?>" class="text-blue-600 hover:text-blue-900 mr-3">
                                     View
                                 </a>
 
                                 <?php if ($app['status'] === 'pending'): ?>
-                                    <a href="/quick_approve?id=<?php echo $app['id']; ?>" class="text-green-600 hover:text-green-900 mr-3">
+                                    <a href="/admin/quick-approve?id=<?php echo $app['id']; ?>" class="text-green-600 hover:text-green-900 mr-3">
                                         Approve
                                     </a>
-                                    <a href="/quick_reject?id=<?php echo $app['id']; ?>" class="text-red-600 hover:text-red-900">
+                                    <a href="/admin/quick-reject?id=<?php echo $app['id']; ?>" class="text-red-600 hover:text-red-900">
                                         Reject
                                     </a>
                                 <?php endif; ?>

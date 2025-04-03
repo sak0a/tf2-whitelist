@@ -3,7 +3,7 @@
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Validate the log file requested
@@ -29,7 +29,7 @@ $allowed_logs = [
 
 if (!in_array($log_file, $allowed_logs)) {
     $_SESSION['admin_error'] = 'Invalid log file requested.';
-    header('Location: dashboard.php');
+    header('Location: /admin/dashboard');
     exit;
 }
 
@@ -57,7 +57,7 @@ if (isset($_GET['clear']) && $_GET['clear'] === 'yes') {
     if (file_exists($log_path)) {
         file_put_contents($log_path, '');
         $_SESSION['admin_success'] = "Log file $log_file has been cleared.";
-        header('Location: view_logs.php?file=' . $log_file);
+        header('Location: /admin/view-logs?file=' . $log_file);
         exit;
     }
 }
@@ -102,7 +102,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'yes') {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
         <div class="flex items-center space-x-4">
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/admin/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -114,14 +114,14 @@ if (isset($_GET['download']) && $_GET['download'] === 'yes') {
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="/dashboard" class="text-gray-700 hover:text-blue-600">
+                    <a href="/admin/dashboard" class="text-gray-700 hover:text-blue-600">
                         Dashboard
                     </a>
                 </li>
                 <li>
                     <div class="flex items-center">
                         <span class="mx-2 text-gray-400">/</span>
-                        <a href="/email_test" class="text-gray-700 hover:text-blue-600">
+                        <a href="/admin/email-test" class="text-gray-700 hover:text-blue-600">
                             Email Settings
                         </a>
                     </div>
@@ -175,11 +175,11 @@ if (isset($_GET['download']) && $_GET['download'] === 'yes') {
         <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
             <h2 class="text-xl font-bold">Log File: <?php echo htmlspecialchars($log_file); ?></h2>
             <div class="flex space-x-2">
-                <a href="/view_logs?file=<?php echo urlencode($log_file); ?>&download=yes"
+                <a href="/admin/view-logs?file=<?php echo urlencode($log_file); ?>&download=yes"
                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
                     Download
                 </a>
-                <a href="/view_logs?file=<?php echo urlencode($log_file); ?>&clear=yes"
+                <a href="/admin/view-logs?file=<?php echo urlencode($log_file); ?>&clear=yes"
                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                    onclick="return confirm('Are you sure you want to clear this log file?');">
                     Clear Log
@@ -199,7 +199,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'yes') {
     </div>
 
     <div class="mt-6">
-        <a href="/email_test" class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded">
+        <a href="/admin/email-test" class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded">
             Back to Email Settings
         </a>
     </div>

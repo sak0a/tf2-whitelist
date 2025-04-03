@@ -1,9 +1,10 @@
 <?php
 // Start session
+global $pdo;
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Get application ID from the URL
@@ -11,15 +12,15 @@ $application_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($application_id <= 0) {
     $_SESSION['admin_error'] = 'Invalid application ID';
-    header('Location: applications.php');
+    header('Location: /admin/applications');
     exit;
 }
 
 // Check for confirmation to prevent accidental deletion
 if (!isset($_GET['confirm']) || $_GET['confirm'] !== 'yes') {
     // Redirect back with a confirmation dialog
-    $_SESSION['admin_warning'] = "Are you sure you want to clear the activity log for application #$application_id? <a href='clear_logs.php?id=$application_id&confirm=yes' class='font-bold text-red-700 hover:underline'>Yes, clear activity logs</a>";
-    header("Location: view_application.php?id=$application_id");
+    $_SESSION['admin_warning'] = "Are you sure you want to clear the activity log for application #$application_id? <a href='/admin/clear-logs?id=$application_id&confirm=yes' class='font-bold text-red-700 hover:underline'>Yes, clear activity logs</a>";
+    header("Location: /admin/view-application/$application_id");
     exit;
 }
 
@@ -34,7 +35,7 @@ try {
 
     if (!$application) {
         $_SESSION['admin_error'] = 'Application not found';
-        header('Location: applications.php');
+        header('Location: /admin/applications');
         exit;
     }
 
@@ -133,6 +134,6 @@ try {
 }
 
 // Redirect back to the application view
-header("Location: view_application.php?id=$application_id");
+header("Location: /admin/view-application/$application_id");
 exit;
 ?>

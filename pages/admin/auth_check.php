@@ -46,7 +46,7 @@ if (isset($_SESSION['admin_role'])) {
 
         // Redirect to dashboard with error
         $_SESSION['admin_error'] = 'You do not have permission to access that page';
-        header('Location: /dashboard');
+        header('Location: /admin/dashboard');
         exit;
     }
 }
@@ -73,7 +73,7 @@ if (isset($_SESSION['admin_last_activity']) &&
     // Redirect to login page with timeout message
     session_start();
     $_SESSION['admin_error'] = 'Your session has expired due to inactivity. Please log in again.';
-    header('Location: login.php');
+    header('Location: /admin/login');
     exit;
 }
 ?>

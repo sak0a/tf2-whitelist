@@ -3,7 +3,7 @@
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Get application ID from the URL
@@ -11,7 +11,7 @@ $application_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($application_id <= 0) {
     $_SESSION['admin_error'] = 'Invalid application ID';
-    header('Location: applications.php');
+    header('Location: /admin/applications');
     exit;
 }
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Prevent modifying rejected/banned applications when newer ones exist
         if ($hasNewerSubmission && ($app['status'] === 'rejected' || $app['status'] === 'banned')) {
             $_SESSION['admin_error'] = 'Cannot modify this application as a newer submission exists';
-            header("Location: view_application.php?id=$application_id");
+            header("Location: /admin/view-application/$application_id");
             exit;
         }
 
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $_SESSION['admin_success'] = "Notes updated successfully";
 
             // Reload the current page to show the updated notes
-            header("Location: view_application.php?id=$application_id&updated=1");
+            header("Location: /admin/view-application/$application_id?updated=1");
             exit;
         } else {
             // Update application status
@@ -112,12 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             // Redirect back to application list or stay on the same page
             if (isset($_POST['redirect']) && $_POST['redirect'] === 'list') {
-                header('Location: applications.php');
+                header('Location: /admin/applications');
                 exit;
             }
 
             // Reload the current page to show the updated status
-            header("Location: view_application.php?id=$application_id&updated=1");
+            header("Location: /admin/view-application/$application_id?updated=1");
             exit;
         }
     } catch (PDOException $e) {
@@ -140,7 +140,7 @@ try {
 
     if (!$application) {
         $_SESSION['admin_error'] = 'Application not found';
-        header('Location: applications.php');
+        header('Location: /admin/applications');
         exit;
     }
 
@@ -158,7 +158,7 @@ try {
 } catch (PDOException $e) {
     $_SESSION['admin_error'] = "Database error: " . $e->getMessage();
     logMessage('admin_error.log', "Database error fetching application $application_id: " . $e->getMessage());
-    header('Location: applications.php');
+    header('Location: /admin/applications');
     exit;
 }
 
@@ -310,7 +310,7 @@ function getStatusBadgeClass($status) {
         <h1 class="text-xl font-bold">Dodgeball Whitelist Admin</h1>
         <div class="flex items-center space-x-4">
             <span><?php echo htmlspecialchars($_SESSION['admin_username']); ?></span>
-            <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
+            <a href="/admin/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Logout</a>
         </div>
     </div>
 </header>
@@ -322,14 +322,14 @@ function getStatusBadgeClass($status) {
         <nav class="flex" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="/dashboard" class="text-gray-700 hover:text-blue-600">
+                    <a href="/admin/dashboard" class="text-gray-700 hover:text-blue-600">
                         Dashboard
                     </a>
                 </li>
                 <li>
                     <div class="flex items-center">
                         <span class="mx-2 text-gray-400">/</span>
-                        <a href="/applications" class="text-gray-700 hover:text-blue-600">
+                        <a href="/admin/applications" class="text-gray-700 hover:text-blue-600">
                             Applications
                         </a>
                     </div>
@@ -570,7 +570,7 @@ function getStatusBadgeClass($status) {
                                             <div class="flex flex-wrap justify-between items-center mb-1">
                                                 <div class="flex items-center">
                                                     <h4 class="font-medium">
-                                                        <a href="/view_application?id=<?php echo $submission['id']; ?>"
+                                                        <a href="/admin/view-application/<?php echo $submission['id']; ?>"
                                                            class="text-blue-600 hover:underline">
                                                             Application #<?php echo $submission['id']; ?>
                                                         </a>
@@ -610,7 +610,7 @@ function getStatusBadgeClass($status) {
                 </div>
 
                 <div class="p-6">
-                    <form method="POST" action="view_application.php?id=<?php echo $application_id; ?>">
+                    <form method="POST" action="/admin/view-application/<?php echo $application_id; ?>">
 
                         <?php if ($hasNewerSubmission && ($application['status'] === 'rejected' || $application['status'] === 'banned')): ?>
                             <div class="mb-4 p-3 bg-yellow-50 border border-yellow-300 rounded text-yellow-800">
@@ -744,7 +744,7 @@ function getStatusBadgeClass($status) {
 
                         <!-- Back to List button - always visible -->
                         <div class="<?php echo $disableControls ? '' : 'mt-3'; ?>">
-                            <a href="/applications" class="block text-center w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                            <a href="/admin/applications" class="block text-center w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
                                 Back to List
                             </a>
                         </div>
@@ -757,7 +757,7 @@ function getStatusBadgeClass($status) {
                 <div class="bg-gray-50 px-6 py-4 border-b">
                     <h2 class="text-lg font-bold">Activity Log</h2>
                     <?php if (!empty($activityLogs)): ?>
-                        <a href="/clear_logs?id=<?php echo $application_id; ?>"
+                        <a href="/admin/clear-logs?id=<?php echo $application_id; ?>"
                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
                             Clear Log
                         </a>
@@ -770,7 +770,7 @@ function getStatusBadgeClass($status) {
                     <?php else: ?>
                         <div class="space-y-4 max-h-96 overflow-y-auto">
                             <?php foreach ($activityLogs as $log): ?>
-                                <div class="border-b pb-3 <?php echo ($log['action'] === 'clear_logs') ? 'bg-gray-50 italic' : ''; ?>">
+                                <div class="border-b pb-3 <?php echo ($log['action'] === 'clear-logs') ? 'bg-gray-50 italic' : ''; ?>">
                                     <div class="flex justify-between items-start mb-1">
                                         <span class="font-medium capitalize"><?php echo str_replace('_', ' ', $log['action']); ?></span>
                                         <span class="text-xs text-gray-500"><?php echo formatDate($log['timestamp']); ?></span>

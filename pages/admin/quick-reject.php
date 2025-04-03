@@ -3,7 +3,7 @@
 session_start();
 
 // Include configuration and admin authentication check
-require_once '../config.php';
+require_once 'config.php';
 require_once 'auth_check.php'; // This file should check if admin is logged in
 
 // Get application ID from the URL
@@ -11,7 +11,7 @@ $application_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($application_id <= 0) {
     $_SESSION['admin_error'] = 'Invalid application ID';
-    header('Location: applications.php');
+    header('Location: /admin/applications');
     exit;
 }
 
@@ -28,13 +28,13 @@ try {
 
     if (!$application) {
         $_SESSION['admin_error'] = 'Application not found';
-        header('Location: applications.php');
+        header('Location: /admin/applications');
         exit;
     }
 
     if ($application['status'] !== 'pending') {
         $_SESSION['admin_error'] = 'Only pending applications can be quickly rejected';
-        header('Location: applications.php');
+        header('Location: /admin/applications');
         exit;
     }
 
@@ -81,5 +81,5 @@ try {
 }
 
 // Redirect back to the applications list
-header('Location: applications.php');
+header('Location: /admin/applications');
 exit;
