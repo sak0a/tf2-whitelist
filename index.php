@@ -22,19 +22,19 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     });
 
     // Handle specific admin routes with parameters
-    $r->addRoute(['GET', 'POST'], '/admin/view-application/{id:\d+}', function($vars) {
+    $r->addRoute(['GET', 'POST'], '/admin/view_application/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/view-application.php';
+        require 'pages/admin/view_application.php';
     });
 
-    $r->addRoute('GET', '/admin/quick-approve/{id:\d+}', function($vars) {
+    $r->addRoute('GET', '/admin/quick_approve/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick-approve.php';
+        require 'pages/admin/quick_approve.php';
     });
 
-    $r->addRoute('GET', '/admin/quick-reject/{id:\d+}', function($vars) {
+    $r->addRoute('GET', '/admin/quick_reject/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick-reject.php';
+        require 'pages/admin/quick_reject.php';
     });
 
     // General admin pages
@@ -67,7 +67,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
             require $file;
         } else {
             header("HTTP/1.0 404 Not Found");
-            echo "404 Page Not Found";
+            require 'pages/404.php';
+            exit;
         }
     });
 });
@@ -82,13 +83,18 @@ if (false !== $pos = strpos($uri, '?')) {
 }
 $uri = rawurldecode($uri);
 
+// Normalize URI to remove trailing slash except for root path
+if ($uri !== '/' && substr($uri, -1) === '/') {
+    $uri = rtrim($uri, '/');
+}
+
 // Dispatch the router
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         // Handle 404 Not Found
         header("HTTP/1.0 404 Not Found");
-        echo "404 Page Not Found";
+        require 'pages/404.php';
         break;
 
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
