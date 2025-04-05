@@ -21,29 +21,53 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
         exit;
     });
 
-    // Handle specific admin routes with parameters
+    // Handle specific admin routes with parameters - support both underscore and hyphen formats
+
+    // View Application
     $r->addRoute(['GET', 'POST'], '/admin/view_application/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/view_application.php';
+        require 'pages/admin/view-application.php';
     });
 
+    $r->addRoute(['GET', 'POST'], '/admin/view-application/{id:\d+}', function($vars) {
+        $_GET['id'] = $vars['id'];
+        require 'pages/admin/view-application.php';
+    });
+
+    // Quick Approve
     $r->addRoute('GET', '/admin/quick_approve/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick_approve.php';
+        require 'pages/admin/quick-approve.php';
+    });
+
+    $r->addRoute('GET', '/admin/quick-approve/{id:\d+}', function($vars) {
+        $_GET['id'] = $vars['id'];
+        require 'pages/admin/quick-approve.php';
+    });
+
+    // Quick Reject
+    $r->addRoute('GET', '/admin/quick-reject/{id:\d+}', function($vars) {
+        $_GET['id'] = $vars['id'];
+        require 'pages/admin/quick-reject.php';
     });
 
     $r->addRoute('GET', '/admin/quick_reject/{id:\d+}', function($vars) {
         $_GET['id'] = $vars['id'];
-        require 'pages/admin/quick_reject.php';
+        require 'pages/admin/quick-reject.php';
     });
 
     // General admin pages
     $r->addRoute(['GET', 'POST'], '/admin/{page}', function($vars) {
         $page = $vars['page'];
+
+        // Try both underscore and hyphen versions of the file
         $file = 'pages/admin/' . $page . '.php';
+        $file_alt = 'pages/admin/' . str_replace('-', '_', $page) . '.php';
 
         if (file_exists($file) && is_readable($file)) {
             require $file;
+        } elseif (file_exists($file_alt) && is_readable($file_alt)) {
+            require $file_alt;
         } else {
             // Check if admin is logged in
             session_start();
@@ -63,9 +87,15 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
         $page = $vars['page'];
         $file = 'pages/' . $page . '.php';
 
+        // Also try with underscores instead of hyphens
+        $file_alt = 'pages/' . str_replace('-', '_', $page) . '.php';
+
         if (file_exists($file) && is_readable($file)) {
             require $file;
+        } elseif (file_exists($file_alt) && is_readable($file_alt)) {
+            require $file_alt;
         } else {
+            // Serve custom 404 page
             header("HTTP/1.0 404 Not Found");
             require 'pages/404.php';
             exit;
@@ -92,7 +122,7 @@ if ($uri !== '/' && substr($uri, -1) === '/') {
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
-        // Handle 404 Not Found
+        // Handle 404 Not Found with custom page
         header("HTTP/1.0 404 Not Found");
         require 'pages/404.php';
         break;
